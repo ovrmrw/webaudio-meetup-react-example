@@ -3,7 +3,11 @@ WebAudio.tokyo #4
 
 ---
 
-Use with [ovrmrw/cognitive-server-starter](https://github.com/ovrmrw/cognitive-server-starter) for the backend to get a token for Watson services.
+Use [ovrmrw/cognitive-server-starter](https://github.com/ovrmrw/cognitive-server-starter) for the backend in order to get a token for Watson services.
+
+[src/Mic.tsx](https://github.com/ovrmrw/webaudio-meetup-react-example/blob/master/src/Mic.tsx) is the component to handle microphones.
+
+---
 
 ## Setup
 

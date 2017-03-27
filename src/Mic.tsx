@@ -3,10 +3,13 @@ import * as recognizeMicrophone from 'watson-speech/speech-to-text/recognize-mic
 
 
 export class Mic extends React.PureComponent<{}, ComponentState> {
+  private isRecording = false
+
+
   constructor(props) {
     super(props)
     this.state = {
-      isRecording: false,
+      // isRecording: false,
       stream: null,
       transcripts: [],
     }
@@ -17,15 +20,20 @@ export class Mic extends React.PureComponent<{}, ComponentState> {
     return fetch('http://localhost:4000/api/watson/speech-to-text/token')
       .then(res => res.json() as any)
       .then(data => data.token)
+      .catch(err => {
+        alert(err)
+        throw err
+      })
   }
 
 
   toggleMicrophoneState() {
+    // isRecording === true && stream === null のときは、RECボタンは押されたがまだstreamが生成される前の状態なので何もしない。
     if (this.state.stream) {
       this.stopRecognizeStream()
 
-    } else if (!this.state.isRecording) {
-      this.setState({ isRecording: true })
+    } else if (!this.isRecording) {
+      this.isRecording = true
 
       this.getTokenAsync()
         .then(token => {
@@ -57,19 +65,19 @@ export class Mic extends React.PureComponent<{}, ComponentState> {
   }
 
 
-
   stopRecognizeStream() {
     if (this.state.stream) {
       this.state.stream.stop()
       this.state.stream.removeAllListeners()
     }
 
-    this.setState({ isRecording: false, stream: null })
+    this.isRecording = false
+    this.setState({ stream: null })
   }
 
 
   render() {
-    const buttonName = !this.state.stream ? 'Rec' : 'Stop'
+    const buttonName = !this.state.stream ? 'REC' : 'STOP'
     const transcripts = this.state.transcripts
 
     return (
@@ -85,7 +93,7 @@ export class Mic extends React.PureComponent<{}, ComponentState> {
 
 
 interface ComponentState {
-  isRecording: boolean,
+  // isRecording: boolean,
   stream: any,
   transcripts: string[],
 }
