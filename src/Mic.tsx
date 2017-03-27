@@ -1,18 +1,16 @@
 import * as React from 'react'
 import * as recognizeMicrophone from 'watson-speech/speech-to-text/recognize-microphone'
+import './Mic.css'
 
 
 export class Mic extends React.PureComponent<{}, ComponentState> {
   private isRecording = false
+  private recognizeStream: any = null
 
 
   constructor(props) {
     super(props)
-    this.state = {
-      // isRecording: false,
-      stream: null,
-      transcripts: [],
-    }
+    this.state = { transcripts: [] }
   }
 
 
@@ -27,15 +25,18 @@ export class Mic extends React.PureComponent<{}, ComponentState> {
   }
 
 
-  toggleMicrophoneState() {
-    // isRecording === true && stream === null のときは、RECボタンは押されたがまだstreamが生成される前の状態なので何もしない。
-    if (this.state.stream) {
+  async toggleMicrophoneState() {
+    /*
+      isRecording === true && recognizeStream === null のときは、
+      RECボタンは押されたがまだrecognizeStreamが生成される前の状態なので何もしない。
+    */
+    if (this.recognizeStream) {
       this.stopRecognizeStream()
 
     } else if (!this.isRecording) {
       this.isRecording = true
 
-      this.getTokenAsync()
+      await this.getTokenAsync()
         .then(token => {
           this.setState({ transcripts: [] })
           this.startRecognizeStream(token)
@@ -61,30 +62,31 @@ export class Mic extends React.PureComponent<{}, ComponentState> {
       }
     })
 
-    this.setState({ stream })
+    this.recognizeStream = stream
   }
 
 
   stopRecognizeStream() {
-    if (this.state.stream) {
-      this.state.stream.stop()
-      this.state.stream.removeAllListeners()
+    if (this.recognizeStream) {
+      this.recognizeStream.stop()
+      this.recognizeStream.removeAllListeners()
     }
 
     this.isRecording = false
-    this.setState({ stream: null })
+    this.recognizeStream = null
   }
 
 
   render() {
-    const buttonName = !this.state.stream ? 'REC' : 'STOP'
-    const transcripts = this.state.transcripts
+    const buttonName = !this.recognizeStream ? 'REC' : 'STOP'
 
     return (
       <div>
         <div>Mic Component</div>
-        <button onClick={() => this.toggleMicrophoneState()}>{buttonName}</button>
-        <div>{transcripts.join(', ')}</div>
+        <button onClick={() => this.toggleMicrophoneState().then(() => this.forceUpdate())}>
+          {buttonName}
+        </button>
+        <div className="transcript">{this.state.transcripts.join(', ')}</div>
       </div>
     )
   }
@@ -92,9 +94,8 @@ export class Mic extends React.PureComponent<{}, ComponentState> {
 
 
 
+
 interface ComponentState {
-  // isRecording: boolean,
-  stream: any,
   transcripts: string[],
 }
 
